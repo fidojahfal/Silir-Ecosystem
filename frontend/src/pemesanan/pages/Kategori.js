@@ -18,7 +18,7 @@ function Kategori() {
   ];
 
   return (
-    <div className="container pt-5">
+    <div className="container pt-5 section_gap mb-5">
       <h2 className="mt-5 text-center">Pilih Kategori Tiket</h2>
       <KategoriList list={dummy} />
     </div>

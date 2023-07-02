@@ -2,6 +2,10 @@ import React from "react";
 import Button from "../../shared/components/Form/Button";
 
 function KategoriItem(props) {
+  function handleChooseCategory() {
+    console.log(props.id);
+  }
+
   return (
     <div className="card text-center m-4">
       <div className="card-header">{props.title}</div>
@@ -12,7 +16,9 @@ function KategoriItem(props) {
         </p>
       </div>
       <div className="card-footer">
-        <Button href="#" class="btn-success">Pilih Kategori</Button>
+        <Button class="btn-success" onClick={handleChooseCategory}>
+          Pilih Kategori
+        </Button>
       </div>
     </div>
   );

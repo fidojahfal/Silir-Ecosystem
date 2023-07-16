@@ -1,21 +1,24 @@
-import React from "react";
+import React, { useMemo } from "react";
 import KategoriList from "../components/KategoriList";
 
 function Kategori() {
-  const dummy = [
-    {
-      category: "1",
-      nama: "Air",
-    },
-    {
-      category: "2",
-      nama: "Darat",
-    },
-    {
-      category: "3",
-      nama: "Api",
-    },
-  ];
+  const dummy = useMemo(
+    () => [
+      {
+        category: "1",
+        nama: "Air",
+      },
+      {
+        category: "2",
+        nama: "Darat",
+      },
+      {
+        category: "3",
+        nama: "Api"
+      },
+    ],
+    []
+  );
 
   return (
     <div className="container pt-5 section_gap mb-5">

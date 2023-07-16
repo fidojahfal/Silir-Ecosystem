@@ -1,9 +1,13 @@
 import React from "react";
 import Button from "../../shared/components/Form/Button";
+import { useNavigate } from "react-router-dom";
 
 function KategoriItem(props) {
+  const navigate = useNavigate();
+
   function handleChooseCategory() {
     console.log(props.id);
+    navigate("/pesan/checkout");
   }
 
   return (

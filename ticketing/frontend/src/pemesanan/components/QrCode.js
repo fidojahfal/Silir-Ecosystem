@@ -2,7 +2,15 @@ import React from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
 function QrCode(props) {
-    return <QRCodeCanvas value={{"id_tiket": "1223"}} size="300" level="H" />
+  return (
+    <div className="mb-2">
+      <QRCodeCanvas
+        value={`{"idTiket": "${props.idTiket}"}`}
+        size="300"
+        level="H"
+      />
+    </div>
+  );
 }
 
 export default QrCode;

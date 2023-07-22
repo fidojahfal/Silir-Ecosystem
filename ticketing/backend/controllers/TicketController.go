@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,7 +19,16 @@ import (
 	"silirapi/models"
 )
 
+type Payment struct {
+	Token        string `json:"token"`
+	Redirect_url string `json:"redirect_url"`
+}
+
 func GetTicket(c *gin.Context) {
+	// if IsAuth(c) != true {
+	// 	c.JSON(http.StatusForbidden, gin.H{})
+	// 	return
+	// }
 	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	_ = err
@@ -44,6 +54,10 @@ func GetTicket(c *gin.Context) {
 }
 
 func StoreTicket(c *gin.Context) {
+	// if IsAuth(c) != true {
+	// 	c.JSON(http.StatusForbidden, gin.H{})
+	// 	return
+	// }
 	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	_ = err
@@ -79,12 +93,13 @@ func StoreTicket(c *gin.Context) {
 	})
 
 	url := "https://app.sandbox.midtrans.com/snap/v1/transactions"
-	payload := strings.NewReader("{\"transaction_details\":{\"order_id\":\"" + transaction_id + "\",\"gross_amount\":100000,},}")
+	payload := strings.NewReader("{\"transaction_details\":{\"order_id\":\"" + transaction_id + "\",\"gross_amount\":100000}}")
 	req, _ := http.NewRequest("POST", url, payload)
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
-	req.Header.Add("Authorization", "Basic SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123!")
+	// req.Header.Add("Authorization", "Basic SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123") //!
+	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123"))) //!
 
 	res, _ := http.DefaultClient.Do(req)
 
@@ -93,8 +108,12 @@ func StoreTicket(c *gin.Context) {
 
 	fmt.Println(string(body))
 
+	var link Payment
+	err = json.Unmarshal(body, &link)
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
+		"token": link.Token,
+		"url":   link.Redirect_url,
 	})
 }
 

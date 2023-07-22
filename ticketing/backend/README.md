@@ -1,10 +1,7 @@
 
 # Silir Pariwisata Seg. - Ticketing and Wahana
 
-API untuk bagian ticketing dan wahana Pariwisata Silir.
-
-
-## API Reference
+API untuk bagian ticketing dan wahana Pariwisata Silir.## API Reference
 
 #### Get all tickets
 
@@ -109,6 +106,15 @@ API untuk bagian ticketing dan wahana Pariwisata Silir.
 | :-------- | :------- | :-------------------------------- |
 | `id_kategori`      | `string` | **Required**. Id dari kategori tiket |
 | `fee`      | `string` | **Required**. Harga tiket |
+
+#### Response - 200
+
+```javascript
+{
+  "token": "dc5c2935-b9f1-4de9-aea9-a8d304ac06e8",
+  "url": "https://app.sandbox.midtrans.com/snap/v3/redirection/dc5c2935-b9f1-4de9-aea9-a8d304ac06e8"
+}
+```
 
 #### Validate ticket
 
@@ -347,6 +353,23 @@ API untuk bagian ticketing dan wahana Pariwisata Silir.
   ],
   "status": "1"
 }
+```
+
+#### Get category by ID
+
+```http
+  PUT /api/v1/category/${id}
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `id`      | `string` | **Required**. Id dari kategori |
+| `Nama_kategori`      | `string` | **Required**. Nama baru kategori |
+| `Available`      | `bool` | **Required**. Status ketersediaan |
+
+#### Response - 200
+
+```javascript
 ```
 
 #### Get all rides

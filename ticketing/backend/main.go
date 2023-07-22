@@ -23,11 +23,19 @@ func main() {
 	v1.GET("/ticket/:id", controllers.GetTicket)
 	v1.POST("/ticket", controllers.StoreTicket)
 	v1.POST("/ticket/validation", controllers.CheckTicket)
+
 	v1.GET("/transaction", controllers.GetTransaction)
+
 	v1.GET("/category", controllers.GetCategory)
 	v1.GET("/category/:id", controllers.GetCategory)
+	v1.PUT("/category/:id", controllers.UpdateCategory)
+	v1.POST("/category", controllers.StoreCategory)
+
 	v1.GET("/ride", controllers.GetRide)
 	v1.GET("/ride/:id", controllers.GetRide)
+	v1.PUT("/ride/:id", controllers.UpdateRide)
+	v1.POST("/ride", controllers.StoreRide)
+
 	route.Run()
 }
 

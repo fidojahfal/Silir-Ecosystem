@@ -83,7 +83,7 @@ func UpdateCategory(c *gin.Context) {
 	var request models.KategoriWahanaRequest
 	err = json.Unmarshal(bodyByte, &request)
 
-	result := db.Model(models.KategoriWahana{}).Where("id = ?", id).Updates(
+	result := db.Model(models.KategoriWahana{}).Where("id = ?", id).Select("nama_kategori", "available").Updates(
 		models.KategoriWahana{
 			Nama_kategori: request.Nama_kategori,
 			Available:     request.Available,

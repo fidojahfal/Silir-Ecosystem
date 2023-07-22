@@ -365,7 +365,7 @@ API untuk bagian ticketing dan wahana Pariwisata Silir.## API Reference
 | :-------- | :------- | :-------------------------------- |
 | `id`      | `string` | **Required**. Id dari kategori |
 | `Nama_kategori`      | `string` | **Required**. Nama baru kategori |
-| `Available`      | `bool` | **Required**. Status ketersediaan |
+| `Available`      | `int` | **Required**. Status ketersediaan |
 
 #### Response - 200
 

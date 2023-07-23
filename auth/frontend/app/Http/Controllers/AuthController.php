@@ -12,7 +12,7 @@ class AuthController extends Controller
     }
 
     function performLogin(Request $request) {
-        $response = Http::post('http://localhost:7777/api/auth/login', [
+        $response = Http::post(env('SG_AUTH') . '/api/auth/login', [
             'email' => $request->email,
             'password' => $request->password,
         ]);

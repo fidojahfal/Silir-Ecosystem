@@ -16,6 +16,12 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/', [MainController::class, 'index'])->middleware('auth.api')->name('main');
 
+Route::get('/event', [MainController::class, 'index'])->middleware('auth.api')->name('main.event');
+
+Route::get('/pariwisata', [MainController::class, 'index'])->middleware('auth.api')->name('main.pariwisata');
+
+Route::get('/hotel', [MainController::class, 'index'])->middleware('auth.api')->name('main.hotel');
+
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'performLogin'])->name('login.perform');
 Route::get('/register', [AuthController::class, 'register'])->name('register');

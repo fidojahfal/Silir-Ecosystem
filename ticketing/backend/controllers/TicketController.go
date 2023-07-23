@@ -33,22 +33,22 @@ func GetTicket(c *gin.Context) {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	_ = err
 	id := c.Param("id")
-
+	tickets := []models.Ticket{}
+	var count int64
 	if id == "" {
-		tickets := []models.Ticket{}
-		result := db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets)
-		_ = result
+		db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets).Count(&count)
+
+	} else {
+		db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets, "id = ?", id).Count(&count)
+	}
+	if count != 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "1",
 			"data":   tickets,
 		})
 	} else {
-		tickets := []models.Ticket{}
-		result := db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets, "id = ?", id)
-		_ = result
-		c.JSON(http.StatusOK, gin.H{
-			"status": "1",
-			"data":   tickets,
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "No data found",
 		})
 	}
 }
@@ -78,19 +78,29 @@ func StoreTicket(c *gin.Context) {
 
 	ticket_id := 70000000 + uint(count)
 
-	db.Create(&models.Ticket{
+	if db.Create(&models.Ticket{
 		Model:       gorm.Model{ID: ticket_id},
 		Id_kategori: request.Id_kategori,
 		Fee:         request.Fee,
-	})
+	}).Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Error in creating new ticket",
+		})
+		return
+	}
 
 	transaction_id := "TR-" + strconv.Itoa(int(ticket_id)) + "-" + strconv.Itoa(int(time.Now().Unix()))
 
-	db.Create(&models.Transaction{
+	if db.Create(&models.Transaction{
 		ID:       transaction_id,
 		Id_tiket: ticket_id,
 		Status:   0,
-	})
+	}).Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Error in creating new transaction",
+		})
+		return
+	}
 
 	url := "https://app.sandbox.midtrans.com/snap/v1/transactions"
 	payload := strings.NewReader("{\"transaction_details\":{\"order_id\":\"" + transaction_id + "\",\"gross_amount\":100000}}")
@@ -98,7 +108,6 @@ func StoreTicket(c *gin.Context) {
 
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
-	// req.Header.Add("Authorization", "Basic SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123") //!
 	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123"))) //!
 
 	res, _ := http.DefaultClient.Do(req)
@@ -111,7 +120,7 @@ func StoreTicket(c *gin.Context) {
 	var link Payment
 	err = json.Unmarshal(body, &link)
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusCreated, gin.H{
 		"token": link.Token,
 		"url":   link.Redirect_url,
 	})
@@ -133,16 +142,46 @@ func CheckTicket(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	tickets := []models.Ticket{}
+	tickets := models.Ticket{}
 	result := db.Find(&tickets, req.Id_tiket)
-	msg := ""
+	t := time.Now()
 	if result.RowsAffected > 0 {
-		msg = "Success"
+		if req.Type == 1 {
+			if tickets.Masuk == nil {
+				result.Updates(models.Ticket{
+					Masuk: &t,
+				})
+			} else {
+				c.JSON(http.StatusForbidden, gin.H{
+					"message": "Ticket has been used",
+				})
+				return
+			}
+		} else if req.Type == 2 {
+			wahanaaaa := models.Wahana{}
+			db.Model(&models.Wahana{}).Find(&wahanaaaa, "id = ?", req.Id_wahana)
+			if wahanaaaa.Id_kategori != tickets.Id_kategori {
+				c.JSON(http.StatusForbidden, gin.H{
+					"message":         "Ticket type is invalid",
+					"ticket category": tickets.Id_kategori,
+					"req category":    wahanaaaa.Id_kategori,
+				})
+				return
+			}
+			if db.Create(&models.HistoriWahana{
+				Id_tiket:  req.Id_tiket,
+				Id_wahana: req.Id_wahana,
+				Fee:       tickets.Fee,
+			}).Error != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": "Error in creating new ride history",
+				})
+				return
+			}
+		}
 	} else {
-		msg = "Not found"
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Ticket not found",
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"status": result.RowsAffected,
-		"data":   msg,
-	})
 }

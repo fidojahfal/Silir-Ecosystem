@@ -7,6 +7,6 @@ use Illuminate\Http\Request;
 class MainController extends Controller
 {
     function index() {
-        return session('access_token');
+        return view('pages.main');
     }
 }

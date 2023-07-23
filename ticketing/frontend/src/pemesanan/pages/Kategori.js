@@ -1,29 +1,45 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import KategoriList from "../components/KategoriList";
+import useHttpClient from "../../shared/components/Hooks/HttpHook";
 
 function Kategori() {
-  const dummy = useMemo(
-    () => [
-      {
-        category: "1",
-        nama: "Air",
-      },
-      {
-        category: "2",
-        nama: "Darat",
-      },
-      {
-        category: "3",
-        nama: "Api"
-      },
-    ],
-    []
-  );
+  const { isLoading, sendRequest, error, clearError } = useHttpClient();
+  const [category, setCategory] = useState([]);
+  // const dummy = useMemo(
+  //   () => [
+  //     {
+  //       category: "1",
+  //       nama: "Air",
+  //     },
+  //     {
+  //       category: "2",
+  //       nama: "Darat",
+  //     },
+  //     {
+  //       category: "3",
+  //       nama: "Api"
+  //     },
+  //   ],
+  //   []
+  // );
 
+  useEffect(() => {
+    async function getCategory() {
+      try {
+        const request = await sendRequest(
+          "https://deus.serveo.net/api/v1/category"
+        );
+        setCategory(request.data);
+      } catch (error) {
+        setCategory([]);
+      }
+    }
+    getCategory();
+  }, [sendRequest]);
   return (
     <div className="container pt-5 section_gap mb-5">
       <h2 className="mt-5 text-center">Pilih Kategori Tiket</h2>
-      <KategoriList list={dummy} />
+      <KategoriList list={category} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
-function useGlobal() {
-  const [categoryGlobal, setsCategoryGlobal] = useState(null);
+export function useGlobal() {
+  const [categoryGlobal, setsCategoryGlobal] = useState();
 
   const setCategoryGlobal = useCallback((category) => {
     setsCategoryGlobal(category);
@@ -10,4 +10,4 @@ function useGlobal() {
   return { categoryGlobal, setCategoryGlobal };
 }
 
-export default useGlobal;
+

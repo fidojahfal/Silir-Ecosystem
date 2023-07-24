@@ -1,10 +1,14 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useContext, useState } from "react";
 import CheckoutList from "../components/CheckoutList";
 import Ringkasan from "../components/Ringkasan";
-import useGlobal from "../../shared/components/Hooks/GlobalHook";
+import { globalContext } from "../../shared/components/Context/global-context";
+import useHttpClient from "../../shared/components/Hooks/HttpHook";
 
 function Checkout() {
-  const { categoryGlobal } = useGlobal();
+  const GlobalVar = useContext(globalContext);
+  const { isLoading, sendRequest, error, clearError } = useHttpClient();
+  const [categoryById, setcategoryById] = useState({});
+  const [wahana, setWahana] = useState([]);
   // const dummy = useMemo(
   //   () => ({
   //     namaWahana: "Wahana Bebas",
@@ -19,19 +23,32 @@ function Checkout() {
   //   []
   // );
   useEffect(() => {
-    console.log(categoryGlobal);
-  }, [categoryGlobal]);
+    async function getCategoryById() {
+      try {
+        const request = await sendRequest(
+          `https://materia.serveo.net/api/v1/category/${GlobalVar.categoryGlobal}`
+        );
+        setcategoryById(request);
+        setWahana(request.wahana);
+      } catch (error) {
+      }
+    }
+    getCategoryById();
+  }, [sendRequest, GlobalVar.categoryGlobal]);
+
+  console.log(categoryById.Wahana);
   return (
-    <div className="container pt-5 section_gap mb-5" style={{ color: "black" }}>
-      <div className="border border-dark border-5 mt-5">
+    <div className="container pt-5 section_gap mb-5 mt-5" style={{ color: "white" }}>
+      <div className="border border-dark border-5 mt-5" style={{ borderColor: "#777777", backgroundColor: "rgba(249, 249, 255, 0.102)"}}>
         <div className="container m-4">
-          {/* <h1 className="">{dummy.namaWahana}</h1> */}
+          <h1 className="">{categoryById.nama_kategori}</h1>
+          {console.log()}
           <div className="row">
             <div className="col-md-8">
-              {/* <CheckoutList lists={dummy.listWahana} /> */}
+              <CheckoutList lists={wahana} />
             </div>
             <div className="col-md-4 align-items-center">
-              {/* <Ringkasan wahana={dummy.namaWahana} /> */}
+              <Ringkasan wahana={categoryById} />
             </div>
           </div>
         </div>

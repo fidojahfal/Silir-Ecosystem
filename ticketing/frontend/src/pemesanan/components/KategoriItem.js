@@ -1,20 +1,20 @@
-import React from "react";
+import React, { useContext } from "react";
 import Button from "../../shared/components/Form/Button";
 import { useNavigate } from "react-router-dom";
-import useGlobal from "../../shared/components/Hooks/GlobalHook";
+import { globalContext } from "../../shared/components/Context/global-context";
 
 function KategoriItem(props) {
   const navigate = useNavigate();
-  const { setCategoryGlobal } = useGlobal();
+  const globalVar = useContext(globalContext);
 
   function handleChooseCategory() {
     console.log(props.id);
-    setCategoryGlobal(props.id);
+    globalVar.setCategoryGlobal(props.id)
     navigate("/pesan/checkout");
   }
 
   return (
-    <div className="card text-center m-4" style={{ minWidth: "300px" }}>
+    <div className="card text-center m-4" style={{ minWidth: "300px", backgroundColor: "rgba(249, 249, 255, 0.102)", borderColor: "#777777", color: "white" }}>
       <div className="card-header">{props.title}</div>
       <div className="card-body">
         <h5 className="card-title">Wahana :</h5>

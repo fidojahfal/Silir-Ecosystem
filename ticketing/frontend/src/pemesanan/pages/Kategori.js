@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useLayoutEffect } from "react";
 import KategoriList from "../components/KategoriList";
 import useHttpClient from "../../shared/components/Hooks/HttpHook";
 
@@ -23,11 +23,15 @@ function Kategori() {
   //   []
   // );
 
+  useLayoutEffect(() => {
+    document.body.style.backgroundColor = "black";
+  }, []);
+
   useEffect(() => {
     async function getCategory() {
       try {
         const request = await sendRequest(
-          "https://deus.serveo.net/api/v1/category"
+          "https://materia.serveo.net/api/v1/category"
         );
         setCategory(request.data);
       } catch (error) {
@@ -38,7 +42,9 @@ function Kategori() {
   }, [sendRequest]);
   return (
     <div className="container pt-5 section_gap mb-5">
-      <h2 className="mt-5 text-center">Pilih Kategori Tiket</h2>
+      <h2 className="mt-5 text-center" color="white">
+        Pilih Kategori Tiket
+      </h2>
       <KategoriList list={category} />
     </div>
   );

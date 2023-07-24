@@ -5,7 +5,7 @@ import NavLink from "./NavLink";
 function MainNavigation() {
   return (
     <MainHeader>
-      <a className="navbar-brand logo_h" href="index.html">
+      <a className="navbar-brand logo_h" href="/">
         <img src="/images/Logo.png" alt=""></img>
       </a>
       <button

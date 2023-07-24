@@ -14,8 +14,8 @@ function Tiket() {
   );
 
   return (
-    <div className="container pt-5 section_gap mb-5" style={{ color: "black" }}>
-      <div className="border border-dark border-5 mt-5 ">
+    <div className="container pt-5 section_gap mb-5" style={{ color: "white" }}>
+      <div className="border border-dark border-5 mt-5 " style={{backgroundColor: "gray"}}>
         <div className="container m-4 ">
           {/* <h1 className="">{dummy.namaWahana}</h1> */}
           <div className="row">

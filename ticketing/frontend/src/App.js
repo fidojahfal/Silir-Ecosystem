@@ -3,7 +3,7 @@ import {
   Routes,
   BrowserRouter as Router,
   Route,
-  Navigate
+  Navigate,
 } from "react-router-dom";
 
 import MainNavigation from "./shared/components/Navigation/MainNavigation";
@@ -22,47 +22,46 @@ import TambahTiket from "./admin/pages/TambahTiket";
 import TambahKategori from "./admin/pages/TambahKategori";
 import TambahWahana from "./admin/pages/TambahWahana";
 import { CheckToken } from "./shared/components/Auth/CheckToken";
+import QRAdmin from "./admin/pages/QRAdmin";
+import Logout from "./shared/components/Form/Logout";
 
 function App() {
-  const { categoryGlobal, setCategoryGlobal } = useGlobal();
+  const {
+    categoryGlobal,
+    urlAPIGlobal,
+    setCategoryGlobal,
+    login,
+    loginDetail,
+  } = useGlobal();
   const [role, setRole] = useState("user");
 
-
-  let router;
-  if (role === "admin") {
-    router = (
-      <Router>
-        <MainAsideNavigation />
-        <main>
-          <Routes>
-            <Route path="/" element={<TiketAdmin />} />
-            <Route path="/tiket/tambah" element={<TambahTiket />} />
-            <Route path="/kategori" element={<KategoriAdmin />} />
-            <Route path="/kategori/tambah" element={<TambahKategori />} />
-            <Route path="/wahana" element={<WahanaAdmin />} />
-            <Route path="/wahana/tambah" element={<TambahWahana />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </main>
-      </Router>
+  let routes;
+  if (loginDetail.role === "admin") {
+    document.body.style.backgroundColor = "white";
+    routes = (
+      <Routes>
+        <Route path="/admin" element={<TiketAdmin />} />
+        <Route path="/admin/tiket/:id" element={<QRAdmin />} />
+        <Route path="/tiket/tambah" element={<TambahTiket />} />
+        <Route path="/kategori" element={<KategoriAdmin />} />
+        <Route path="/kategori/tambah" element={<TambahKategori />} />
+        <Route path="/wahana" element={<WahanaAdmin />} />
+        <Route path="/wahana/tambah" element={<TambahWahana />} />
+        <Route path="/logout" element={<Logout />} />
+        {/* <Route path="*" element={<Navigate to="/admin" />} /> */}
+      </Routes>
     );
   } else {
     document.body.style.backgroundColor = "black";
-    router = (
-      <Router>
-        <MainNavigation />
-        <main>
-        {/* <CheckToken /> */}
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/pesan/kategori" element={<Kategori />} />
-            <Route path="/pesan/checkout" element={<Checkout />} />
-            <Route path="/tiket/:id" element={<Tiket />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </main>
-        <FooterLanding />
-      </Router>
+    routes = (
+      <Routes>
+        <Route path="/landing" element={<Landing />} />
+        <Route path="/pesan/kategori" element={<Kategori />} />
+        <Route path="/pesan/checkout" element={<Checkout />} />
+        <Route path="/tiket/:id" element={<Tiket />} />
+        <Route path="/logout" element={<Logout />} />
+        {/* <Route path="*" element={<Navigate to="/landing" />} /> */}
+      </Routes>
     );
   }
 
@@ -71,9 +70,25 @@ function App() {
       value={{
         categoryGlobal,
         setCategoryGlobal,
+        urlAPI: urlAPIGlobal,
+        login,
+        userId: loginDetail.userId,
+        nama: loginDetail.nama,
+        role: loginDetail.role,
       }}
     >
-      {router}
+      <Router>
+        {loginDetail.role === "admin" ? (
+          <MainAsideNavigation />
+        ) : (
+          <MainNavigation />
+        )}
+        <main>
+          <CheckToken />
+          {routes}
+        </main>
+        {loginDetail.role === "user" && <FooterLanding />}
+      </Router>
     </globalContext.Provider>
   );
 }

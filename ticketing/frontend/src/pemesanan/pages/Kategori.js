@@ -1,10 +1,18 @@
-import React, { useMemo, useEffect, useState, useLayoutEffect } from "react";
+import React, {
+  useMemo,
+  useEffect,
+  useState,
+  useLayoutEffect,
+  useContext,
+} from "react";
 import KategoriList from "../components/KategoriList";
 import useHttpClient from "../../shared/components/Hooks/HttpHook";
+import { globalContext } from "../../shared/components/Context/global-context";
 
 function Kategori() {
   const { isLoading, sendRequest, error, clearError } = useHttpClient();
   const [category, setCategory] = useState([]);
+  const GlobalVar = useContext(globalContext);
   // const dummy = useMemo(
   //   () => [
   //     {
@@ -31,7 +39,7 @@ function Kategori() {
     async function getCategory() {
       try {
         const request = await sendRequest(
-          "https://materia.serveo.net/api/v1/category"
+          `http://${GlobalVar.urlAPI}:8080/api/v1/category`
         );
         setCategory(request.data);
       } catch (error) {

@@ -5,8 +5,8 @@ function QrCode(props) {
   return (
     <div className="mb-2">
       <QRCodeCanvas
-        value={`{"idTiket": "${props.idTiket}"}`}
-        size="300"
+        value={`{"id_tiket": ${parseInt(props.idTiket)}}`}
+        size="200"
         level="H"
       />
     </div>

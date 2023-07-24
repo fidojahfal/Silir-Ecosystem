@@ -7,7 +7,7 @@ import "./style/css/style.css.map";
 import "./style/css/font-awesome.min.css";
 import "./style/admin/dist/css/adminlte.min.css"
 import "./style/admin/fontawesome-free/css/all.min.css"
-import "./style/admin/dist/js/adminlte";
+import "./style/admin/dist/js/adminlte.min.js";
 
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

@@ -8,7 +8,7 @@ function TiketItem(props) {
             <td>{tiket.KategoriWahana.Nama_kategori}</td>
             <td>{tiket.ID}</td>
             <td>-</td>
-            <td>{tiket.masuk}</td>
+            <td>{tiket.Masuk}</td>
             <td>-</td>
         </tr>
       })}

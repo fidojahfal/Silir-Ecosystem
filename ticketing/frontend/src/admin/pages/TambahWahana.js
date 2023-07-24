@@ -1,18 +1,52 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Input from "../../shared/components/Form/Input";
 import Button from "../../shared/components/Form/Button";
+import { globalContext } from "../../shared/components/Context/global-context";
+import useHttpClient from "../../shared/components/Hooks/HttpHook";
+import { useNavigate } from "react-router-dom";
 
 function TambahWahana() {
   const [dataForm, setDataForm] = useState({
     nama_wahana: "",
-    kategori: undefined,
-    harga: undefined,
+    id_kategori: undefined,
+    fee: undefined,
   });
 
-  function handleSubmit(event) {
+  const GlobalVar = useContext(globalContext);
+  const [kategori, setKategori] = useState([]);
+  const { sendRequest } = useHttpClient();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function getKategori() {
+      try {
+        const request = await sendRequest(
+          `http://${GlobalVar.urlAPI}:8080/api/v1/category`
+        );
+        setKategori(request.data);
+      } catch (error) {}
+    }
+    getKategori();
+  }, [GlobalVar.urlAPI, sendRequest]);
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    console.log(dataForm);
+    try {
+      await sendRequest(
+        `http://${GlobalVar.urlAPI}:8080/api/v1/ride`,
+        "POST",
+        JSON.stringify({
+          nama_wahana: dataForm.nama_wahana,
+          id_kategori: parseInt(dataForm.id_kategori),
+          fee: parseInt(dataForm.fee),
+        }),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+    } catch (error) {}
+    navigate("/wahana");
   }
 
   function handleChange(event) {
@@ -58,18 +92,18 @@ function TambahWahana() {
                       typeInput="select"
                       title="Kategori"
                       type="text"
-                      name="kategori"
-                      id="kategori"
-                      dataKategori={[1, 2, 3]}
+                      name="id_kategori"
+                      id="id_kategori"
+                      dataKategori={kategori}
                       onChange={handleChange}
                       value={dataForm.kategori}
                     />
                     <Input
                       title="Harga"
                       type="number"
-                      name="harga"
+                      name="fee"
                       placeholder="Masukkan Harga"
-                      id="harga"
+                      id="fee"
                       onChange={handleChange}
                       value={dataForm.harga}
                     />

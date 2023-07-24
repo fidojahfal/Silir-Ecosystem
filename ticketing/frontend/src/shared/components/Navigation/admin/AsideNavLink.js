@@ -19,7 +19,7 @@ function AsideNavLink() {
             <span className="badge badge-info right"></span>
           </p>
         </a>
-        <ul className="nav nav-treeview">
+        <ul className="nav nav-treeview" style={{display: "block"}}>
           <li className="nav-item">
             <a href="/tiket/tambah" className="nav-link">
               <i className="far fa-circle nav-icon"></i>
@@ -52,7 +52,7 @@ function AsideNavLink() {
             <span className="badge badge-info right"></span>
           </p>
         </a>
-        <ul className="nav nav-treeview">
+        <ul className="nav nav-treeview" style={{display: "block"}}>
           <li className="nav-item">
             <a href="/kategori/tambah" className="nav-link">
               <i className="far fa-circle nav-icon"></i>
@@ -76,7 +76,7 @@ function AsideNavLink() {
             <span className="badge badge-info right"></span>
           </p>
         </a>
-        <ul className="nav nav-treeview">
+        <ul className="nav nav-treeview" style={{display: "block"}}>
           <li className="nav-item">
             <a href="/wahana/tambah" className="nav-link">
               <i className="far fa-circle nav-icon"></i>
@@ -90,6 +90,15 @@ function AsideNavLink() {
             </a>
           </li>
         </ul>
+      </li>
+      <li className="nav-item">
+        <a href="/logout" className="nav-link">
+          <i className="nav-icon fas fa-th"></i>
+          <p>
+            Logout
+            <span className="right badge badge-danger"></span>
+          </p>
+        </a>
       </li>
     </ul>
   );

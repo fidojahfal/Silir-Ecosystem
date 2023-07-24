@@ -12,41 +12,33 @@ function Ringkasan(props) {
 
   async function handleBuy() {
     try {
-      // const request = await sendRequest(
-      //   "https://materia.servero.net/api/v1/ticket",
-      //   "POST",
-      //   JSON.stringify({
-      //     id_kategory: parseInt(GlobalVar.categoryGlobal),
-      //     fee: parseInt(props.wahana.total),
-      //   }),
-      //   {
-      //     // "Content-Type": "application/json",
-      //     Authorization: `Bearer `,
-      //   }
-      // );
 
       const request = await axios.post(
-        "https://materia.servero.net/api/v1/ticket",
+        `http://${GlobalVar.urlAPI}:8080/api/v1/ticket`,
         {
-          id_kategory: parseInt(GlobalVar.categoryGlobal),
+          id_kategori: parseInt(GlobalVar.categoryGlobal),
           fee: parseInt(props.wahana.total),
         },
         {
           headers: {
             "Content-Type": "application/json",
+            // Authorization: "bearer " + sessionStorage.getItem("access_token")
           },
         }
       );
-      console.log(request);
-      // window.open(request.url, "_blank", "noreferrer");
-      // navigate(`/tiket/` + request.transaction_id);
+      window.open(request.data.url, "_blank", "noreferrer");
+      navigate(`/tiket/` + request.data.transaction_id);
     } catch (error) {}
   }
 
   return (
     <div
       className="border border-dark border-3"
-      style={{ maxWidth: "80%", borderColor: "#777777", backgroundColor: "gray" }}
+      style={{
+        maxWidth: "80%",
+        borderColor: "#777777",
+        backgroundColor: "gray",
+      }}
     >
       <div className="container mt-3">
         <h6 className="mb-3 font-weight-bold">Ringksan</h6>

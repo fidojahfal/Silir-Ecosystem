@@ -16,7 +16,7 @@ function Input(props) {
         >
         <option value=""></option>
           {props.dataKategori.map((kategori, index) => {
-            return <option key={index} value={kategori}>{kategori}</option>;
+            return <option key={index} value={kategori.ID}>{kategori.Nama_kategori}</option>;
           })}
         </select>
       </div>
@@ -34,6 +34,7 @@ function Input(props) {
         placeholder={props.placeholder}
         onChange={props.onChange}
         value={props.value}
+        disabled={props.disabled}
       />
     </div>
   );

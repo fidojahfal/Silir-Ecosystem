@@ -1,17 +1,33 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Header from "../components/Header";
 import Input from "../../shared/components/Form/Input";
 import Button from "../../shared/components/Form/Button";
+import useHttpClient from "../../shared/components/Hooks/HttpHook";
+import { globalContext } from "../../shared/components/Context/global-context";
+import { useNavigate } from "react-router-dom";
 
 function TambahKategori() {
+  const { sendRequest } = useHttpClient();
+  const GlobalVar = useContext(globalContext);
+  const navigate = useNavigate();
   const [dataForm, setDataForm] = useState({
     nama_kategori: "",
     available: "",
   });
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    console.log(dataForm);
+    try {
+      await sendRequest(
+        `http://${GlobalVar.urlAPI}:8080/api/v1/category`,
+        "POST",
+        JSON.stringify(dataForm),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+    } catch (error) {}
+    navigate("/kategori");
   }
 
   function handleChange(event) {

@@ -1,20 +1,47 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Header from "../components/Header";
 import Input from "../../shared/components/Form/Input";
 import Button from "../../shared/components/Form/Button";
+import { globalContext } from "../../shared/components/Context/global-context";
+import useHttpClient from "../../shared/components/Hooks/HttpHook";
+import { useNavigate } from "react-router-dom";
 
 function TambahTiket() {
+  const GlobalVar = useContext(globalContext);
+  const [kategori, setKategori] = useState([]);
+  const { sendRequest } = useHttpClient();
   const [dataForm, setDataForm] = useState({
-    kategori: undefined,
-    id_tiket: "",
-    id_user: "",
-    tanggal_masuk: "",
+    id_kategori: 0,
+    id_user: GlobalVar.userId,
     status: "",
   });
+  const navigate = useNavigate();
 
-  function handleSubmit(event) {
+  useEffect(() => {
+    async function getKategori() {
+      try {
+        const request = await sendRequest(
+          `http://${GlobalVar.urlAPI}:8080/api/v1/category`
+        );
+        setKategori(request.data);
+      } catch (error) {}
+    }
+    getKategori();
+  }, [GlobalVar.urlAPI, sendRequest]);
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    console.log(dataForm);
+    try {
+      const request = await sendRequest(
+        `http://${GlobalVar.urlAPI}:8080/api/v1/ticket`,
+        "POST",
+        JSON.stringify(dataForm),
+        {
+          "Content-Type": "application/json",
+        }
+      );
+        navigate("/admin/tiket/" + request.transaction_id);
+    } catch (error) {}
   }
 
   function handleChange(event) {
@@ -23,7 +50,7 @@ function TambahTiket() {
     setDataForm((prevDataForm) => {
       return {
         ...prevDataForm,
-        [name]: value,
+        [name]: parseInt(value),
       };
     });
   }
@@ -50,20 +77,11 @@ function TambahTiket() {
                     <Input
                       typeInput="select"
                       title="Kategori Wahana"
-                      dataKategori={[1, 2, 3]}
-                      name="kategori"
-                      id="kategori"
+                      dataKategori={kategori}
+                      name="id_kategori"
+                      id="id_kategori"
                       onChange={handleChange}
                       //   value={dataForm.id_tiket}
-                    />
-                    <Input
-                      title="id_tiket"
-                      type="text"
-                      name="id_tiket"
-                      placeholder="Masukkan id tiket"
-                      id="id_tiket"
-                      onChange={handleChange}
-                      value={dataForm.id_tiket}
                     />
                     <Input
                       title="id_user"
@@ -72,16 +90,8 @@ function TambahTiket() {
                       placeholder="Masukkan id user"
                       id="id_user"
                       onChange={handleChange}
-                      value={dataForm.id_user}
-                    />
-
-                    <Input
-                      title="Tanggal Masuk"
-                      type="date"
-                      name="tanggal_masuk"
-                      id="tanggal_masuk"
-                      onChange={handleChange}
-                      value={dataForm.tanggal_masuk}
+                      value={GlobalVar.userId}
+                      disabled={true}
                     />
                     <Input
                       title="Status"
@@ -94,7 +104,9 @@ function TambahTiket() {
                   </div>
                   {/* /.card-body */}
                   <div className="card-footer">
-                    <Button type="submit" class="btn-primary">Submit</Button>
+                    <Button type="submit" class="btn-primary">
+                      Submit
+                    </Button>
                   </div>
                 </form>
               </div>

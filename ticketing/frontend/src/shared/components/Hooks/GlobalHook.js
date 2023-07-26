@@ -1,13 +1,27 @@
 import { useCallback, useState } from "react";
 
-function useGlobal() {
-  const [categoryGlobal, setsCategoryGlobal] = useState(null);
+export function useGlobal() {
+  const [categoryGlobal, setsCategoryGlobal] = useState();
+  const [loginDetail, setLoginDetail] = useState({});
+  const [urlAPIGlobal, setUrlApiGlobal] = useState("192.168.246.241");
 
   const setCategoryGlobal = useCallback((category) => {
     setsCategoryGlobal(category);
   }, []);
 
-  return { categoryGlobal, setCategoryGlobal };
-}
+  const login = useCallback((userId, nama, role) => {
+    setLoginDetail({
+      userId,
+      role,
+      nama
+    });
+  }, []);
 
-export default useGlobal;
+  return {
+    categoryGlobal,
+    urlAPIGlobal,
+    loginDetail,
+    login,
+    setCategoryGlobal,
+  };
+}

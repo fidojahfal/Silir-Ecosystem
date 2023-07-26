@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/responsive.css') }}">
 </head>
 
-<body>
+<body class="{{ $class ?? '' }}">
     @include('layouts.header')
     @yield('content')
     @include('layouts.footer')

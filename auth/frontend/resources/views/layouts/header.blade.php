@@ -3,7 +3,7 @@
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light">
             <!-- Brand and toggle get grouped for better mobile display -->
-            <a class="navbar-brand logo_h" href="index.html"><img src="{{asset('image/Logo.png')}}" alt=""></a>
+            <a class="navbar-brand logo_h" href="index.html"><img style="width: 50%;" src="{{asset('image/Logo.png')}}" alt=""></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -12,10 +12,11 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                 <ul class="nav navbar-nav menu_nav ml-auto">
-                    <li class="nav-item active"><a class="nav-link" href="">Home</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="{{ route('main') }}">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('main.pariwisata') }}">Ticket & Pariwisata</a></li>
-                    <li class="nav-item"><a class="nav-link" href="accomodation.html">Event</a></li>
-                    <li class="nav-item"><a class="nav-link" href="gallery.html">Hotel</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('main.event') }}">Event</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('main.hotel') }}">Hotel</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('admin.parkir') }}">Parkir</a></li>
                     <!-- <li class="nav-item submenu dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Blog</a>
                         <ul class="dropdown-menu">
@@ -24,7 +25,7 @@
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="elements.html">Elemests</a></li> -->
-                    <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('logout') }}">Logout</a></li>
                 </ul>
             </div>
         </nav>

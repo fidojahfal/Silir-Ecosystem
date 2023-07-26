@@ -47,10 +47,7 @@ func IsAdmin(c *gin.Context) bool {
 	resBody, _ := ioutil.ReadAll(response.Body)
 	var user models.User
 	err = json.Unmarshal(resBody, &user)
-	if response.StatusCode != 200 {
-		return false
-	}
-	if user.Role != "admin" {
+	if response.StatusCode != 200 || err != nil || user.Role != "admin" {
 		return false
 	}
 	defer response.Body.Close()

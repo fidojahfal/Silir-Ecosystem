@@ -1,12 +1,13 @@
 package main
 
 import (
+	"silirapi/config"
 	"silirapi/controllers"
 	"silirapi/models"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -14,8 +15,8 @@ func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "*")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -27,19 +28,21 @@ func CORSMiddleware() gin.HandlerFunc {
 }
 
 func main() {
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
-
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	AutoMigrate(db)
 
 	route := gin.Default()
-	route.Use(CORSMiddleware())
+	// route.Use(CORSMiddleware())
+	route.Use(cors.Default())
 	v1 := route.Group("/api/v1")
 	v1.GET("/ticket", controllers.GetTicket)
 	v1.GET("/ticket/:id", controllers.GetTicket)
-	v1.POST("/ticket", controllers.StoreTicket)
+	v1.GET("/ticketby/:id", controllers.AmbilTicket)
 	v1.POST("/ticket/validation", controllers.CheckTicket)
+	v1.POST("/ticket", controllers.StoreTicket)
 
 	v1.GET("/transaction", controllers.GetTransaction)
 

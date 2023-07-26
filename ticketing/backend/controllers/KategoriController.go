@@ -7,41 +7,51 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"silirapi/models"
+	"silirapi/config"
+	"silirapi/entity/model"
+	"silirapi/entity/request"
+	"silirapi/entity/response"
 )
 
 func GetCategory(c *gin.Context) {
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	id := c.Param("id")
 
 	if id == "" {
-		categories := []models.KategoriWahana{}
-		result := db.Model(&[]models.KategoriWahana{}).Preload("Wahana").Table("kategori_wahanas").Find(&categories)
+		categories := []response.APIKategori{}
+		result := db.Model(&[]model.KategoriWahana{}).Preload("Wahana").Table("kategori_wahanas").Find(&categories)
 		_ = result
 		c.JSON(http.StatusOK, gin.H{
 			"status": "1",
 			"data":   categories,
 		})
 	} else {
-		categories := []models.KategoriWahana{}
-		result := db.Model(&[]models.KategoriWahana{}).Preload("Wahana").Table("kategori_wahanas").Find(&categories, "id = ?", id)
+		categories := response.APIKategori{}
+		result := db.Model(&model.KategoriWahana{}).Preload("Wahana").Table("kategori_wahanas").Find(&categories, "id = ?", id)
 		_ = result
+		total := 0
+		for _, element := range categories.Wahana {
+			total += int(element.Fee)
+		}
 		c.JSON(http.StatusOK, gin.H{
-			"status": "1",
-			"data":   categories,
+			"id":            categories.ID,
+			"nama_kategori": categories.Nama_kategori,
+			"total":         total,
+			"wahana":        categories.Wahana,
 		})
 	}
 }
 
 func StoreCategory(c *gin.Context) {
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	bodyByte, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		log.Println(err)
@@ -50,16 +60,16 @@ func StoreCategory(c *gin.Context) {
 		})
 		return
 	}
-	var request models.KategoriWahanaRequest
+	var request request.Kategori
 	err = json.Unmarshal(bodyByte, &request)
 
 	var count int64
 
-	db.Model(&models.KategoriWahana{}).Count(&count)
+	db.Model(&model.KategoriWahana{}).Count(&count)
 
 	category_id := 50000000 + uint(count)
 
-	db.Create(&models.KategoriWahana{
+	db.Create(&model.KategoriWahana{
 		Model:         gorm.Model{ID: category_id},
 		Nama_kategori: request.Nama_kategori,
 		Available:     request.Available,
@@ -67,9 +77,10 @@ func StoreCategory(c *gin.Context) {
 }
 
 func UpdateCategory(c *gin.Context) {
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	id := c.Param("id")
 
 	bodyByte, err := ioutil.ReadAll(c.Request.Body)
@@ -80,11 +91,11 @@ func UpdateCategory(c *gin.Context) {
 		})
 		return
 	}
-	var request models.KategoriWahanaRequest
+	var request request.Kategori
 	err = json.Unmarshal(bodyByte, &request)
 
-	result := db.Model(models.KategoriWahana{}).Where("id = ?", id).Select("nama_kategori", "available").Updates(
-		models.KategoriWahana{
+	result := db.Model(model.KategoriWahana{}).Where("id = ?", id).Select("nama_kategori", "available").Updates(
+		model.KategoriWahana{
 			Nama_kategori: request.Nama_kategori,
 			Available:     request.Available,
 		})

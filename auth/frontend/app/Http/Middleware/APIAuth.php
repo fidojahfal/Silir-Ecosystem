@@ -22,7 +22,7 @@ class APIAuth
             // cek token sama yang ada di api
             $response = Http::withHeaders([
                 'Authorization' => 'bearer ' . session('access_token'),
-            ])->get('http://localhost:7777/api/auth/user-profile');
+            ])->get('http://192.168.0.112:7777/api/auth/user-profile');
             
             // kalo tokennya masih valid, statusnya 200
             if ($response->status() == 200){
@@ -41,7 +41,12 @@ class APIAuth
             // hapus session yang lama kalo ada
             $request->session()->flush();
             // pake session yang baru
-            session(['access_token' => $request['access_token']]);
+            session([
+                'access_token' => $request['access_token'], 
+                'role' => $request['role']
+            ]);
+            
+            return $next($request);
         }
 
         // ini kalo emang blm login sama sekali, di session ga ada, ga bawa token sama sekali

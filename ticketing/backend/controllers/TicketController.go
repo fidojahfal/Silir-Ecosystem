@@ -13,10 +13,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"silirapi/config"
 	"silirapi/models"
+	"silirapi/models/responses"
 )
 
 type Payment struct {
@@ -29,26 +30,88 @@ func GetTicket(c *gin.Context) {
 	// 	c.JSON(http.StatusForbidden, gin.H{})
 	// 	return
 	// }
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	id := c.Param("id")
-	tickets := []models.Ticket{}
 	var count int64
+	tickets := []responses.APITicket{}
 	if id == "" {
 		db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets).Count(&count)
 
+		if count != 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "1",
+				"data":   tickets,
+			})
+		}
 	} else {
-		db.Model(&[]models.Ticket{}).Preload("KategoriWahana").Preload("Transaction").Find(&tickets, "id = ?", id).Count(&count)
+		transaction := models.Transaction{}
+		tickets := models.Ticket{}
+		db.Model(&models.Transaction{}).Find(&transaction, "id = ?", id).Count(&count)
+
+		url := "https://api.sandbox.midtrans.com/v2/" + id + "/status"
+		payload := strings.NewReader("")
+		req, _ := http.NewRequest("GET", url, payload)
+
+		req.Header.Add("accept", "application/json")
+		req.Header.Add("content-type", "application/json")
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("SB-Mid-server-Dc5jdhFPLHf1ItzRoF0dE_uC:Silirinterop123"))) //!
+
+		res, _ := http.DefaultClient.Do(req)
+
+		body, _ := io.ReadAll(res.Body)
+		defer res.Body.Close()
+		var status models.StatusRequest
+		err = json.Unmarshal(body, &status)
+
+		statusK := 0
+		if status.Transaction_status == "settlement" {
+			statusK = 2
+		} else if status.Transaction_status == "pending" {
+			statusK = 0
+		} else if status.Transaction_status == "cancel" {
+			statusK = 1
+		}
+		fmt.Println(string(body))
+
+		db.Model(&models.Ticket{}).Preload("KategoriWahana").Find(&tickets, "id = ?", transaction.Id_tiket).Count(&count)
+
+		db.Model(&models.Transaction{}).Find(&transaction, "id = ?", id).Count(&count).Updates(
+			models.Transaction{Status: uint(statusK)})
+
+		if count != 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "1",
+				"data":   tickets,
+			})
+		}
 	}
+	// else {
+	// 	c.JSON(http.StatusNotFound, gin.H{
+	// 		"message": "No data found",
+	// 	})
+	// }
+}
+
+func AmbilTicket(c *gin.Context) {
+	// if IsAuth(c) != true {
+	// 	c.JSON(http.StatusForbidden, gin.H{})
+	// 	return
+	// }
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
+	id := c.Param("id")
+	var count int64
+	tickets := models.Ticket{}
+	db.Model(&models.Ticket{}).Preload("KategoriWahana").Find(&tickets, "id = ?", id).Count(&count)
 	if count != 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "1",
 			"data":   tickets,
-		})
-	} else {
-		c.JSON(http.StatusNotFound, gin.H{
-			"message": "No data found",
 		})
 	}
 }
@@ -58,9 +121,10 @@ func StoreTicket(c *gin.Context) {
 	// 	c.JSON(http.StatusForbidden, gin.H{})
 	// 	return
 	// }
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	_ = err
+	db, err := config.Conn()
+	if err != nil {
+		panic(err)
+	}
 	bodyByte, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		log.Println(err)
@@ -78,10 +142,19 @@ func StoreTicket(c *gin.Context) {
 
 	ticket_id := 70000000 + uint(count)
 
+	categories := models.KategoriWahana{}
+	result := db.Model(&models.KategoriWahana{}).Preload("Wahana").Table("kategori_wahanas").Find(&categories, "id = ?", request.Id_kategori)
+	_ = result
+	total := 0
+	for _, element := range categories.Wahana {
+		total += int(element.Fee)
+	}
+
 	if db.Create(&models.Ticket{
 		Model:       gorm.Model{ID: ticket_id},
 		Id_kategori: request.Id_kategori,
-		Fee:         request.Fee,
+		Id_user:     request.Id_user,
+		Fee:         float32(total),
 	}).Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error in creating new ticket",
@@ -94,7 +167,7 @@ func StoreTicket(c *gin.Context) {
 	if db.Create(&models.Transaction{
 		ID:       transaction_id,
 		Id_tiket: ticket_id,
-		Status:   0,
+		Status:   uint(request.Status),
 	}).Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error in creating new transaction",
@@ -103,7 +176,7 @@ func StoreTicket(c *gin.Context) {
 	}
 
 	url := "https://app.sandbox.midtrans.com/snap/v1/transactions"
-	payload := strings.NewReader("{\"transaction_details\":{\"order_id\":\"" + transaction_id + "\",\"gross_amount\":100000}}")
+	payload := strings.NewReader("{\"transaction_details\":{\"order_id\":\"" + transaction_id + "\",\"gross_amount\":" + fmt.Sprintf("%v", total) + "}}")
 	req, _ := http.NewRequest("POST", url, payload)
 
 	req.Header.Add("accept", "application/json")
@@ -121,14 +194,14 @@ func StoreTicket(c *gin.Context) {
 	err = json.Unmarshal(body, &link)
 
 	c.JSON(http.StatusCreated, gin.H{
-		"token": link.Token,
-		"url":   link.Redirect_url,
+		"token":          link.Token,
+		"url":            link.Redirect_url,
+		"transaction_id": transaction_id,
 	})
 }
 
 func CheckTicket(c *gin.Context) {
-	dsn := "root:@tcp(127.0.0.1:3306)/silir-api?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := config.Conn()
 	if err != nil {
 		panic(err)
 	}
@@ -179,6 +252,9 @@ func CheckTicket(c *gin.Context) {
 				return
 			}
 		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Ticket has been validated",
+		})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Ticket not found",
